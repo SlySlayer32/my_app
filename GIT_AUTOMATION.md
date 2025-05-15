@@ -31,6 +31,7 @@ You can pass parameters to customize the script behavior:
 ```
 
 Available parameters:
+
 - `CommitMessagePrefix`: Prefix for commit messages (default: "Auto-commit: ")
 - `CheckIntervalSeconds`: How often to check for changes in seconds (default: 300)
 - `Branch`: The branch to push changes to (default: "main")
@@ -41,16 +42,19 @@ Available parameters:
 If you need to roll back to a previous state:
 
 1. View the commit history:
+
    ```
    git log --oneline
    ```
 
 2. Roll back to a specific commit:
+
    ```
    git reset --hard <commit-hash>
    ```
 
 3. Force-push the rollback if needed:
+
    ```
    git push --force origin <branch-name>
    ```
