@@ -4,18 +4,43 @@
 
 param(
     [string]$CommitMessagePrefix = "Auto-commit: ",
-    [int]$CheckIntervalSeconds = 300,  # Default: check every 5 minutes
+    [int]$CheckIntervalSeconds = 1500,  # Default: check every 25 minutes
     [string]$Branch = "main",          # Default branch
-    [string]$GitPath = "git"           # Path to git executable
+    [string]$GitPath = "git",           # Path to git executable
+    [string]$IgnorePattern = "*.log|*.tmp|.vs/|.idea/",  # Files to ignore
+    [bool]$PushImmediately = $true     # Whether to push immediately after commit
 )
 
 $projectPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $currentDate = Get-Date -Format "yyyy-MM-dd"
 $currentTimeCounter = 1
+$ignoreList = $IgnorePattern -split '\|'
 
-Write-Host "Auto-Git-Push started for: $projectPath" -ForegroundColor Green
-Write-Host "Press Ctrl+C to stop the script" -ForegroundColor Yellow
-Write-Host "Checking for changes every $CheckIntervalSeconds seconds..." -ForegroundColor Cyan
+# Create a log file for the auto-commit operations
+$logFile = Join-Path $projectPath "auto-git-push.log"
+$maxLogSize = 5MB  # Maximum log file size before rotation
+
+# Function to write to both console and log file
+function Log-Message {
+    param (
+        [string]$Message,
+        [string]$ForegroundColor = "White"
+    )
+    
+    # Write to console
+    Write-Host $Message -ForegroundColor $ForegroundColor
+    
+    # Write to log file with timestamp
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    "$timestamp - $Message" | Out-File -FilePath $logFile -Append
+
+    # Check log file size and rotate if necessary
+    if ((Get-Item $logFile).Length -gt $maxLogSize) {
+        $backupLogFile = $logFile + "." + (Get-Date -Format "yyyyMMddHHmmss")
+        Move-Item $logFile $backupLogFile
+        "Log file rotated at $timestamp" | Out-File -FilePath $logFile
+    }
+}
 
 try {
     while ($true) {
