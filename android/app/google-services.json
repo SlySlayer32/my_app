@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "290979462186",
+    "project_id": "reimage",
+    "storage_bucket": "reimage.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290979462186:android:4c54ce14c02bb8ad1f1753",
+        "android_client_info": {
+          "package_name": "com.revision.org.my_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0N75KyY9TjHPcjL9rXb3jZVKpfEbm11Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290979462186:android:93a88b6c0d78089f1f1753",
+        "android_client_info": {
+          "package_name": "com.revision.org.my_app.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0N75KyY9TjHPcjL9rXb3jZVKpfEbm11Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
