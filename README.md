@@ -174,3 +174,26 @@ Alternatively, run `flutter run` and code generation will take place automatical
 [very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
 [very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
 [very_good_cli_link]: https://github.com/VeryGoodOpenSource/very_good_cli
+
+---
+
+## Git Workflow & Automation 🔄
+
+This project includes automated Git commit and push capabilities to ensure all code changes are tracked and can be rolled back if needed.
+
+### Automated Git Tracking
+
+See the following documentation files for details:
+
+- [Git Automation Setup](GIT_AUTOMATION.md) - How to use the auto-commit script
+- [GitHub Repository Setup](GITHUB_SETUP.md) - Setting up remote GitHub repository
+- [Git Rollback Guide](GIT_ROLLBACK_GUIDE.md) - How to roll back to previous versions
+
+To start the automated Git tracking:
+
+```sh
+# Run in a separate terminal
+./auto-git-push.ps1
+```
+
+This will automatically commit and push your changes at regular intervals, creating a safety net for your development process.
