@@ -42,7 +42,32 @@ function Log-Message {
     }
 }
 
+Log-Message "Auto-Git-Push started for: $projectPath" "Green"
+Log-Message "Press Ctrl+C to stop the script" "Yellow"
+Log-Message "Checking for changes every $($CheckIntervalSeconds / 60) minutes..." "Cyan"
+Log-Message "Ignoring files matching: $IgnorePattern" "Cyan"
+
+# Function to check if a file should be ignored
+function Should-Ignore {
+    param (
+        [string]$FilePath
+    )
+    foreach ($pattern in $ignoreList) {
+        if ($pattern -and $FilePath -like $pattern) {
+            return $true
+        }
+    }
+    return $false
+}
+
 try {
+    # First, check if remote is configured
+    $remoteExists = & $GitPath remote -v
+    if (-not $remoteExists) {
+        Log-Message "Warning: No remote repository configured. Commits will be local only." "Yellow"
+    }
+
+    # Main monitoring loop
     while ($true) {
         Set-Location $projectPath
         
@@ -50,26 +75,67 @@ try {
         $status = & $GitPath status --porcelain
         
         if ($status) {
-            $currentTime = Get-Date -Format "HH:mm:ss"
-            $commitMessage = "$CommitMessagePrefix$currentDate #$currentTimeCounter [$currentTime]"
+            $filesToCommit = @()
+            $ignoredFiles = @()
             
-            Write-Host "`n=== Changes detected at $currentTime ===" -ForegroundColor Yellow
-            Write-Host "Files changed:" -ForegroundColor Cyan
-            Write-Host $status
+            # Process each file in the status output
+            foreach ($line in $status -split "`n") {
+                $statusCode = $line.Substring(0, 2).Trim()
+                $filePath = $line.Substring(3).Trim()
+                
+                if (Should-Ignore $filePath) {
+                    $ignoredFiles += $filePath
+                } else {
+                    $filesToCommit += $filePath
+                }
+            }
             
-            # Add all changes
-            & $GitPath add --all
-            
-            # Commit changes
-            Write-Host "Committing with message: $commitMessage" -ForegroundColor Cyan
-            & $GitPath commit -m $commitMessage
-            
-            # Push changes
-            Write-Host "Pushing to remote repository..." -ForegroundColor Cyan
-            & $GitPath push origin $Branch
-            
-            Write-Host "Changes committed and pushed successfully!" -ForegroundColor Green
-            $currentTimeCounter++
+            # Only proceed if there are files to commit
+            if ($filesToCommit.Count -gt 0) {
+                $currentTime = Get-Date -Format "HH:mm:ss"
+                $commitMessage = "$CommitMessagePrefix$currentDate #$currentTimeCounter [$currentTime]"
+                
+                Log-Message "`n=== Changes detected at $currentTime ===" "Yellow"
+                Log-Message "Files to commit:" "Cyan"
+                foreach ($file in $filesToCommit) {
+                    Log-Message "  $file" "White"
+                }
+                
+                if ($ignoredFiles.Count -gt 0) {
+                    Log-Message "Ignored files:" "Gray"
+                    foreach ($file in $ignoredFiles) {
+                        Log-Message "  $file" "Gray"
+                    }
+                }
+                
+                # Stage all files except ignored ones
+                foreach ($file in $filesToCommit) {
+                    & $GitPath add $file
+                }
+                
+                # Commit changes
+                Log-Message "Committing with message: $commitMessage" "Cyan"
+                & $GitPath commit -m $commitMessage
+                
+                # Push changes if configured to do so and remote exists
+                if ($PushImmediately -and $remoteExists) {
+                    Log-Message "Pushing to remote repository..." "Cyan"
+                    $pushResult = & $GitPath push origin $Branch 2>&1
+                    
+                    if ($LASTEXITCODE -eq 0) {
+                        Log-Message "Changes committed and pushed successfully!" "Green"
+                    } else {
+                        Log-Message "Push failed. Error: $pushResult" "Red"
+                        Log-Message "Commits are saved locally and will be pushed on next successful attempt." "Yellow"
+                    }
+                } else {
+                    Log-Message "Changes committed locally!" "Green"
+                }
+                
+                $currentTimeCounter++
+            } else {
+                Log-Message "All changed files match ignore patterns, nothing to commit." "Gray"
+            }
         } else {
             Write-Host "." -NoNewline -ForegroundColor Gray
         }
@@ -78,7 +144,7 @@ try {
         Start-Sleep -Seconds $CheckIntervalSeconds
     }
 } catch {
-    Write-Host "`nScript interrupted: $_" -ForegroundColor Red
+    Log-Message "`nScript interrupted: $_" "Red"
 } finally {
-    Write-Host "`nAuto-Git-Push stopped." -ForegroundColor Yellow
+    Log-Message "`nAuto-Git-Push stopped." "Yellow"
 }
