@@ -16,9 +16,11 @@ cd G:\BUILDING\docs\my_app
 ```
 
 3. The script will automatically:
-   - Check for changes every 5 minutes (configurable)
+   - Check for changes every 25 minutes (configurable)
+   - Ignore specified file patterns (logs, temp files, etc.)
    - Commit any detected changes with a timestamped message
    - Push the changes to your remote repository
+   - Log all operations to auto-git-push.log
 
 4. To stop the script, press `Ctrl+C` in the terminal window.
 
@@ -27,15 +29,17 @@ cd G:\BUILDING\docs\my_app
 You can pass parameters to customize the script behavior:
 
 ```powershell
-.\auto-git-push.ps1 -CommitMessagePrefix "Custom message: " -CheckIntervalSeconds 120 -Branch "development"
+.\auto-git-push.ps1 -CommitMessagePrefix "Custom message: " -CheckIntervalSeconds 1800 -Branch "development" -IgnorePattern "*.log|*.tmp|build/*" -PushImmediately $false
 ```
 
 Available parameters:
 
 - `CommitMessagePrefix`: Prefix for commit messages (default: "Auto-commit: ")
-- `CheckIntervalSeconds`: How often to check for changes in seconds (default: 300)
+- `CheckIntervalSeconds`: How often to check for changes in seconds (default: 1500, which is 25 minutes)
 - `Branch`: The branch to push changes to (default: "main")
 - `GitPath`: Path to the Git executable (default: "git")
+- `IgnorePattern`: Pipe-separated list of file patterns to ignore (default: "*.log|*.tmp|.vs/|.idea/")
+- `PushImmediately`: Whether to push changes immediately after commit (default: $true)
 
 ## Rolling Back Changes
 
