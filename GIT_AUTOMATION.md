@@ -64,3 +64,27 @@ If you need to roll back to a previous state:
    ```
 
 Remember to always create backup branches before performing forced operations.
+
+## Best Practices for Auto-Git-Push
+
+1. **Commit Frequency**: 
+   - The default 25-minute interval balances between frequent backups and avoiding excessive commits
+   - Use shorter intervals during critical development phases
+   - Use longer intervals for routine work
+
+2. **File Exclusions**:
+   - Exclude build artifacts, logs, and temporary files using the `-IgnorePattern` parameter
+   - Always exclude files containing sensitive information
+   - Consider adding large binary files to .gitignore instead
+
+3. **Log Monitoring**:
+   - Check auto-git-push.log periodically to verify commit history
+   - The log file automatically rotates when it reaches 5MB
+
+4. **Remote Synchronization**:
+   - If working in a team, consider setting `-PushImmediately $false` to accumulate commits locally
+   - Then manually push at logical break points to avoid disrupting others
+
+5. **Script Performance**:
+   - For large repositories, increase the check interval to reduce system impact
+   - The script has minimal impact when running in the background
