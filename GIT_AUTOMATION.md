@@ -67,7 +67,7 @@ Remember to always create backup branches before performing forced operations.
 
 ## Best Practices for Auto-Git-Push
 
-1. **Commit Frequency**: 
+1. **Commit Frequency**:
    - The default 25-minute interval balances between frequent backups and avoiding excessive commits
    - Use shorter intervals during critical development phases
    - Use longer intervals for routine work
