@@ -17,10 +17,10 @@ dependencies:
   intl: ^0.19.0
 
   # Firebase
-  firebase_core: ^2.25.4
-  firebase_auth: ^4.16.0
-  cloud_firestore: ^4.15.4
-  firebase_storage: ^11.6.5
+  firebase_core: ^3.13.0
+  firebase_auth: ^5.5.3
+  cloud_firestore: ^5.6.7
+  firebase_storage: ^12.4.5
 
   # Camera & Image Processing
   camera: ^0.10.5+5
