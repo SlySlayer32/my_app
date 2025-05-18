@@ -71,5 +71,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'reimage.firebasestorage.app',
     iosBundleId: 'com.revision.org.my-app.dev',
   );
-
 }

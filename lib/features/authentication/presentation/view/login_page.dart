@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:my_app/features/authentication/domain/models/auth_state.dart';
 import 'package:my_app/features/authentication/presentation/cubit/auth_cubit.dart';
 
@@ -30,8 +31,7 @@ class _LoginPageState extends State<LoginPage> {
         listener: (context, state) {
           state.maybeWhen(
             authenticated: (_) {
-              // Navigate to home page
-              // context.go('/home');
+              context.go('/home');
             },
             error: (message) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -44,59 +44,89 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context, state) {
           return Padding(
             padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        return null;
+                      },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                        border: OutlineInputBorder(),
+                      ),
+                      obscureText: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
                     ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  state.maybeWhen(
-                    loading: () => const CircularProgressIndicator(),
-                    orElse: () => Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: _handleLogin,
-                          child: const Text('Login'),
+                    const SizedBox(height: 24),
+                    if (state.maybeWhen(
+                      loading: () => true,
+                      orElse: () => false,
+                    )) ...[
+                      const Center(child: CircularProgressIndicator()),
+                    ] else ...[
+                      ElevatedButton(
+                        onPressed: _handleLogin,
+                        child: const Text('Login'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () {
+                          context.go('/signup');
+                        },
+                        child: const Text('Create Account'),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.blue.shade300,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            // Navigate to signup page
-                            // context.go('/signup');
-                          },
-                          child: const Text('Create Account'),
+                        child: Semantics(
+                          label: 'Skip login and go to dashboard',
+                          hint: 'Development mode only',
+                          button: true,
+                          child: TextButton.icon(
+                            onPressed: () => context.go('/dashboard'),
+                            icon: const Icon(Icons.skip_next, size: 24),
+                            label: const Text(
+                              'Skip (Dev Mode)',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.blue.shade700,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           );

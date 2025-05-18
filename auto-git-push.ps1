@@ -4,11 +4,12 @@
 
 param(
     [string]$CommitMessagePrefix = "Auto-commit: ",
-    [int]$CheckIntervalSeconds = 1500,  # Default: check every 25 minutes
-    [string]$Branch = "main",          # Default branch
-    [string]$GitPath = "git",           # Path to git executable
-    [string]$IgnorePattern = "*.log|*.tmp|.vs/|.idea/",  # Files to ignore
-    [bool]$PushImmediately = $true     # Whether to push immediately after commit
+    [int]$CheckIntervalSeconds = 900, # Default: check every 15 minutes
+    [string]$Branch = "main", # Default branch
+    [string]$GitPath = "git", # Path to git executable
+    [string]$IgnorePattern = "*.log|*.tmp|.vs/|.idea/|*.jpg|*.png|*.gif|*.bmp|build/*|dist/*|node_modules/*|__pycache__/*", # Files to ignore
+    [bool]$PushImmediately = $true, # Whether to push immediately after commit
+    [bool]$RequireReviewForMain = $true  # Whether to require review for main branch commits
 )
 
 $projectPath = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -85,7 +86,8 @@ try {
                 
                 if (Should-Ignore $filePath) {
                     $ignoredFiles += $filePath
-                } else {
+                }
+                else {
                     $filesToCommit += $filePath
                 }
             }
@@ -119,32 +121,45 @@ try {
                 
                 # Push changes if configured to do so and remote exists
                 if ($PushImmediately -and $remoteExists) {
-                    Log-Message "Pushing to remote repository..." "Cyan"
-                    $pushResult = & $GitPath push origin $Branch 2>&1
-                    
-                    if ($LASTEXITCODE -eq 0) {
-                        Log-Message "Changes committed and pushed successfully!" "Green"
-                    } else {
-                        Log-Message "Push failed. Error: $pushResult" "Red"
-                        Log-Message "Commits are saved locally and will be pushed on next successful attempt." "Yellow"
+                    # Check branch protection
+                    if ($RequireReviewForMain -and $Branch -eq "main") {
+                        Log-Message "Changes committed but not pushed - main branch requires review." "Yellow"
+                        Log-Message "Please create a pull request for review." "Yellow"
                     }
-                } else {
+                    else {
+                        Log-Message "Pushing to remote repository..." "Cyan"
+                        $pushResult = & $GitPath push origin $Branch 2>&1
+                        
+                        if ($LASTEXITCODE -eq 0) {
+                            Log-Message "Changes committed and pushed successfully!" "Green"
+                        }
+                        else {
+                            Log-Message "Push failed. Error: $pushResult" "Red"
+                            Log-Message "Commits are saved locally and will be pushed on next successful attempt." "Yellow"
+                        }
+                    }
+                }
+                else {
                     Log-Message "Changes committed locally!" "Green"
                 }
                 
                 $currentTimeCounter++
-            } else {
+            }
+            else {
                 Log-Message "All changed files match ignore patterns, nothing to commit." "Gray"
             }
-        } else {
+        }
+        else {
             Write-Host "." -NoNewline -ForegroundColor Gray
         }
         
         # Wait for the specified interval
         Start-Sleep -Seconds $CheckIntervalSeconds
     }
-} catch {
+}
+catch {
     Log-Message "`nScript interrupted: $_" "Red"
-} finally {
+}
+finally {
     Log-Message "`nAuto-Git-Push stopped." "Yellow"
 }
